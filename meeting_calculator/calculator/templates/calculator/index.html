@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Cost Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding-top: 50px; /* Отступ сверху */
+        }
+
+        h1 {
+            margin-bottom: 0px; /* Уменьшаем отступ снизу */
+            color: #333;
+        }
+
+        h2 {
+            margin-bottom: 15px; /* Уменьшаем отступ снизу */
+            color: #333;
+            font-size: 16px; /* Уменьшаем размер текста */
+        }
+
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 500px; /* Увеличиваем ширину формы */
+            height: 560px; /* Добавляем фиксированную высоту */
+            box-sizing: border-box; /* Включаем padding в расчет высоты и ширины */
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input[type="number"],
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #timer {
+            font-size: 2em;
+            margin: 20px 0;
+        }
+
+        #time-display {
+            font-size: 1em;
+            color: #2F4F4F;
+            margin-top: -110px;
+            margin-left: 188px; /* Отступ слева */
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+
+<!--        цена с галочкой!-->
+        #cost {
+            font-size: 1em;
+            color: #008080;
+            margin-top: 20px;
+            margin-left: 0px; /* Отступ слева */
+            margin-right: 10px; /* Отступ справа */
+        }
+
+        #cost-display {
+            margin-top: 20px;
+            font-size: 1.5em;
+            color: #007bff;
+        }
+
+        .clock {
+            position: relative;
+            width: 290px;
+            height: 290px;
+            background-image: url('/mnt/data/image.png'); /* Используем изображение швейцарских часов */
+            background-size: cover;
+            border: 1px solid #ccc;
+            border-radius: 50%;
+        }
+
+
+        .hand {
+            fill: none;
+            stroke: #FF0000;
+            stroke-width: 1px;
+            stroke-linecap: round;
+            transform-origin: 50% 50%;
+            transition: transform 0.5s cubic-bezier(0.4, 2.3, 0.3, 1);
+            z-index: 50; /* Размещаем стрелку ниже текста */
+            opacity: 0.8; /* Делаем стрелку более прозрачной */
+        }
+
+
+        #timer-button-container {
+            margin-top: 10px; /* Отступ сверху */
+            margin-bottom: 10px; /* Отступ снизу */
+            margin-left: 10px; /* Отступ слева */
+            margin-right: 10px; /* Отступ справа */
+        }
+
+        #clock-container {
+            margin-top: -40px; /* Отступ сверху */
+            margin-bottom: 10px; /* Отступ снизу */
+            margin-left: 70px; /* Отступ слева */
+            margin-right: 10px; /* Отступ справа */
+        }
+
+
+        #cost {
+            font-size: 1em;
+            color: #007bff; /* синий цвет для цены с галочкой */
+            margin-top: 20px;
+            margin-left: 0px; /* Отступ слева */
+            margin-right: 10px; /* Отступ справа */
+        }
+
+        #reset-button-container {
+            margin-top: -40px; /* Отступ сверху */
+            margin-bottom: 10px; /* Отступ снизу */
+            margin-left: 350px; /* Отступ слева */
+            margin-right: 10px; /* Отступ справа */
+            text-align: center;
+        }
+
+
+        #manual-reset-button-container {
+            position: relative; /* Относительное позиционирование для контейнера */
+            margin-top: 10px; /* Отступ сверху */
+            margin-bottom: 10px; /* Отступ снизу */
+            margin-left: 10px; /* Отступ слева */
+            margin-right: 10px; /* Отступ справа */
+            text-align: left; /* Выравнивание текста по левому краю */
+        }
+
+        #manual-reset-button-container button {
+            position: absolute; /* Абсолютное позиционирование для кнопки */
+            left: 0; /* Положение слева */
+        }
+
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-container label {
+            margin-bottom: 0;
+            margin-right: 10px;
+        }
+
+        #timer-container {
+            margin-top: 30px; /* Отступ сверху */
+            margin-bottom: 20px; /* Отступ снизу */
+            z-index: 100; /* Размещаем текст выше стрелки */
+            text-align: center; /* Выравнивание по центру */
+            position: relative; /* Относительное позиционирование */
+        }
+
+        .cost-value {
+            margin-top: 58px;
+            position: absolute; /* Абсолютное позиционирование */
+            left: 39%; /* Положение слева */
+        }
+
+        .cost-meeting-container {
+            font-size: 0.2 em; /* Размер текста */
+            position: absolute; /* Абсолютное позиционирование */
+            top: 65%; /* Положение сверху */
+            left: 47%; /* Положение слева */
+            margin-top: 68px; /* Дополнительный отступ сверху */
+            transform: translate(-50%, -50%); /* Центрирование */
+        }
+
+        .clock-face {
+            fill: none;
+            stroke: #2F4F4F;
+            stroke-width: 1px;
+            opacity: 0.85;
+            filter: url(#shadow); /* Apply the shadow filter */
+        }
+
+        .tick {
+            stroke: #2F4F4F;
+            stroke-width: 1;
+            opacity: 0.85;
+            z-index: 0;
+        }
+
+        .tick-long {
+            stroke: #2F4F4F;
+            stroke-width: 2;
+            opacity: 0.85;
+            z-index: 0;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Meeting Cost Calculator</h1>
+    <h2>How much does your call cost?</h2>
+    <form id="calculator-form">
+        <div>
+            <label for="participants">Number of participants:</label>
+            <input type="number" id="participants" name="participants" value="5" min="1">
+        </div>
+        <div>
+            <label for="salary">Average salary ($/month):</label>
+            <input type="number" id="salary" name="salary" value="5000" min="0">
+        </div>
+        <div class="checkbox-container">
+            <label for="know-duration">Do you know the duration?</label>
+            <input type="checkbox" id="know-duration" name="know_duration" onchange="toggleDurationInput()">
+        </div>
+        <div id="manual-duration" class="hidden">
+            <label for="duration">Duration (minutes):</label>
+            <input type="number" id="duration" name="duration" value="30" min="0">
+        </div>
+        <div id="timer-button-container">
+            <button type="button" id="timer-button" onclick="toggleTimer()">Start Timer</button>
+        </div>
+
+        <div id="timer-container">
+            <div class="cost-content">
+            <div id="timer" class="cost-value">$0.00</div>
+            <div id="cost-meeting" class="cost-meeting-container">
+        <h2>Meeting Cost</h2>
+        </div>
+    </div>
+        </div>
+        <div id="clock-container">
+            <div class="clock">
+                <svg class="clock" viewBox="0 0 100 100">
+                    <defs>
+                        <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#000" flood-opacity="0.5"/>
+                        </filter>
+                    </defs>
+                    <circle class="clock-face" cx="50" cy="50" r="47"/>
+
+                    <circle cx="50" cy="50" r="2" fill="#FF0000"/> <!-- Red dot at the center -->
+                    <!-- Добавляем длинные отметки каждую 5 секунду -->
+                    <line class="tick-long" x1="50" y1="3" x2="50" y2="13" transform="rotate(0, 50, 50)" />
+                    <line class="tick-long" x1="50" y1="3" x2="50" y2="13" transform="rotate(30, 50, 50)" />
+                    <line class="tick-long" x1="50" y1="3" x2="50" y2="13" transform="rotate(60, 50, 50)" />
+                    <line class="tick-long" x1="50" y1="3" x2="50" y2="13" transform="rotate(90, 50, 50)" />
+                    <line class="tick-long" x1="50" y1="3" x2="50" y2="13" transform="rotate(120, 50, 50)" />
+                    <line class="tick-long" x1="50" y1="3" x2="50" y2="13" transform="rotate(150, 50, 50)" />
+                    <line class="tick-long" x1="50" y1="3" x2="50" y2="13" transform="rotate(180, 50, 50)" />
+                    <line class="tick-long" x1="50" y1="3" x2="50" y2="13" transform="rotate(210, 50, 50)" />
+                    <line class="tick-long" x1="50" y1="3" x2="50" y2="13" transform="rotate(240, 50, 50)" />
+                    <line class="tick-long" x1="50" y1="3" x2="50" y2="13" transform="rotate(270, 50, 50)" />
+                    <line class="tick-long" x1="50" y1="3" x2="50" y2="13" transform="rotate(300, 50, 50)" />
+                    <line class="tick-long" x1="50" y1="3" x2="50" y2="13" transform="rotate(330, 50, 50)" />
+                    <!-- Добавляем короткие отметки каждую 1 секунду -->
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(6, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(12, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(18, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(24, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(36, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(42, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(48, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(54, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(66, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(72, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(78, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(84, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(96, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(102, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(108, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(114, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(126, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(132, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(138, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(144, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(156, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(162, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(168, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(174, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(186, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(192, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(198, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(204, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(216, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(222, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(228, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(234, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(246, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(252, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(258, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(264, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(276, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(282, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(288, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(294, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(306, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(312, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(318, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(324, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(336, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(342, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(348, 50, 50)" />
+                    <line class="tick" x1="50" y1="6" x2="50" y2="13" transform="rotate(354, 50, 50)" />>
+                    <line class="hand" id="second-hand" x1="50" y1="60" x2="50" y2="7"/>
+                </svg>
+            </div>
+        </div>
+        <div id="reset-button-container">
+            <button type="button" onclick="resetForm()">Reset</button>
+        </div>
+        <div id="time-display">00:00:00</div>
+        <div id="cost-container" class="hidden">
+            <h2>Meeting Cost: $ <span id="cost"> 0</span></h2>
+        </div>
+        <div id="calculate-button-container" class="hidden">
+            <button type="button" onclick="calculateCost()">Calculate Cost</button>
+        </div>
+        <div id="manual-reset-button-container" class="hidden">
+            <button type="button" onclick="resetManualForm()">Reset</button>
+        </div>
+
+    </form>
+
+    <a href="{% url 'google_login' %}">Login with Google to view calendar events</a>
+
+    <script>
+        let startTime, timerInterval;
+        let elapsedTime = 0; // Время, прошедшее с начала таймера
+        let isTimerRunning = false;
+        let durationInMinutes = 0;
+        let revolutions = 0;
+        let lastAngle = 0;
+
+        function toggleDurationInput() {
+            const manualDuration = document.getElementById('manual-duration');
+            const timerButtonContainer = document.getElementById('timer-button-container');
+            const timerContainer = document.getElementById('timer-container');
+            const clockContainer = document.getElementById('clock-container');
+            const calculateButtonContainer = document.getElementById('calculate-button-container');
+            const costContainer = document.getElementById('cost-container');
+            const manualResetButtonContainer = document.getElementById('manual-reset-button-container');
+            const timeDisplay = document.getElementById('time-display');
+            const knowDuration = document.getElementById('know-duration').checked;
+
+            if (knowDuration) {
+                manualDuration.classList.remove('hidden');
+                calculateButtonContainer.classList.remove('hidden');
+                costContainer.classList.remove('hidden');
+                manualResetButtonContainer.classList.remove('hidden');
+                timerButtonContainer.classList.add('hidden');
+                timerContainer.classList.add('hidden');
+                clockContainer.classList.add('hidden');
+                timeDisplay.classList.add('hidden');
+                document.getElementById('reset-button-container').classList.add('hidden');
+            } else {
+                manualDuration.classList.add('hidden');
+                calculateButtonContainer.classList.add('hidden');
+                costContainer.classList.add('hidden');
+                manualResetButtonContainer.classList.add('hidden');
+                timerButtonContainer.classList.remove('hidden');
+                timerContainer.classList.remove('hidden');
+                clockContainer.classList.remove('hidden');
+                timeDisplay.classList.remove('hidden');
+                document.getElementById('reset-button-container').classList.remove('hidden');
+            }
+        }
+
+        function startTimer() {
+            startTime = Date.now() - elapsedTime; // Начинаем с учётом уже прошедшего времени
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            elapsedTime = Date.now() - startTime; // Сохраняем прошедшее время
+        }
+
+        function toggleTimer() {
+            const timerButton = document.getElementById('timer-button');
+            if (isTimerRunning) {
+                stopTimer();
+                timerButton.innerText = 'Continue Timer';
+            } else {
+                startTimer();
+                timerButton.innerText = 'Pause Timer';
+            }
+            isTimerRunning = !isTimerRunning;
+        }
+
+        function updateTimer() {
+            const now = Date.now();
+            const elapsedTimeInSeconds = Math.floor((now - startTime) / 1000);
+            const hours = String(Math.floor(elapsedTimeInSeconds / 3600)).padStart(2, '0');
+            const minutes = String(Math.floor((elapsedTimeInSeconds % 3600) / 60)).padStart(2, '0');
+            const seconds = String(elapsedTimeInSeconds % 60).padStart(2, '0');
+            durationInMinutes = parseInt(hours) * 60 + parseInt(minutes) + seconds / 60;
+
+            const participants = document.getElementById('participants').value;
+            const salary = document.getElementById('salary').value;
+            if (participants <= 0 || salary < 0) {
+                alert('Participants and salary must be non-negative numbers.');
+                resetForm();
+                return;
+            }
+            const hourlyRate = salary / 176;  // 176 рабочих часов в месяц
+            const cost = participants * hourlyRate * (elapsedTimeInSeconds / 3600); // Стоимость в часах
+
+            document.getElementById('timer').innerText = `$${cost.toFixed(2)}`;
+            document.getElementById('time-display').innerText = `${hours}:${minutes}:${seconds}`;
+
+            // Обновление угла стрелки
+            let angle = 6 * seconds;
+            if (angle < lastAngle) revolutions += 1;
+            let secondRotation = (revolutions * 360 + angle) + "deg";
+            lastAngle = angle;
+
+            const secondHand = document.getElementById('second-hand');
+            secondHand.style.transform = `rotate(${secondRotation})`;
+        }
+
+        function calculateCost() {
+            const participants = document.getElementById('participants').value;
+            const salary = document.getElementById('salary').value;
+            const duration = parseFloat(document.getElementById('duration').value);
+
+            if (participants <= 0 || salary < 0 || duration < 0) {
+                alert('Participants, salary, and duration must be non-negative numbers.');
+                return;
+            }
+
+            const hourlyRate = salary / 176;  // 176 рабочих часов в месяц
+            const cost = participants * hourlyRate * (duration / 60);
+
+            document.getElementById('cost').innerText = cost.toFixed(2);
+        }
+
+        function resetForm() {
+            document.getElementById('calculator-form').reset();
+            document.getElementById('timer').innerText = '$0.00';
+            document.getElementById('cost').innerText = '0'; // Сбрасываем значение стоимости
+            document.getElementById('time-display').innerText = '00:00:00'; // Сбрасываем значение таймера
+            clearInterval(timerInterval);
+            elapsedTime = 0;
+            isTimerRunning = false;
+            durationInMinutes = 0;
+            revolutions = 0;
+            lastAngle = 0;
+            const secondHand = document.getElementById('second-hand');
+            secondHand.style.transform = `rotate(0deg)`;
+            document.getElementById('timer-button').innerText = 'Start Timer';
+            toggleDurationInput();
+        }
+
+        function resetManualForm() {
+            document.getElementById('calculator-form').reset();
+            document.getElementById('cost').innerText = '0'; // Сбрасываем значение стоимости
+            if (document.getElementById('know-duration').checked) {
+                document.getElementById('duration').value = '0'; // Сбрасываем значение продолжительности
+            }
+        }
+    </script>
+</body>
+</html>
