@@ -19,7 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # OAuth2.0 settings
 CLIENT_SECRET_FILE = os.path.join(BASE_DIR, 'credentials.json')
-SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
+SCOPES = ['https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/calendar.readonly']
 REDIRECT_URI = 'http://localhost:8000/oauth2callback'
 
 # Quick-start development settings - unsuitable for production

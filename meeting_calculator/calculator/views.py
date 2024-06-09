@@ -10,7 +10,7 @@ from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 from .models import OAuthState
 
-# Установить OAUTHLIB_INSECURE_TRANSPORT для разработки
+# OAUTHLIB_INSECURE_TRANSPORT для разработки
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 CLIENT_SECRET_FILE = settings.CLIENT_SECRET_FILE
@@ -75,7 +75,7 @@ def oauth2callback(request):
     credentials = flow.credentials
     request.session['credentials'] = credentials_to_dict(credentials)
 
-    return redirect('calendar')
+    return redirect('calendar_list')
 
 def credentials_to_dict(credentials):
     return {
@@ -86,6 +86,28 @@ def credentials_to_dict(credentials):
         'client_secret': credentials.client_secret,
         'scopes': credentials.scopes
     }
+
+
+def calendar_list(request):
+    creds = None
+    if 'credentials' in request.session:
+        creds = Credentials(**request.session['credentials'])
+
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            return redirect('google_login')
+
+    service = build("calendar", "v3", credentials=creds)
+    calendar_list = service.calendarList().list().execute()
+    calendars = calendar_list.get('items', [])
+
+    calendar_choices = [(calendar['id'], calendar['summary']) for calendar in calendars]
+
+    return render(request, 'calculator/calendar_list.html', {'calendar_choices': calendar_choices})
+
+
 
 def calendar(request):
     creds = None
@@ -99,16 +121,66 @@ def calendar(request):
             return redirect('google_login')
 
     service = build("calendar", "v3", credentials=creds)
-    now = datetime.datetime.utcnow().isoformat() + 'Z'
-    events_result = service.events().list(calendarId='primary', timeMin=now,
-                                          maxResults=10, singleEvents=True,
+
+    calendar_id = request.GET.get('calendar_id', 'primary')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    salary = float(request.GET.get('salary', 0))
+
+    # Проверка на отрицательную зарплату
+    if salary < 0:
+        return render(request, 'calculator/calendar.html', {
+            'events': [],
+            'total_time': '0 minutes',
+            'total_cost': '$0.00',
+            'start_date': start_date,
+            'end_date': end_date,
+            'error': 'Salary cannot be negative.'
+        })
+
+    if start_date and end_date:
+        time_min = datetime.datetime.strptime(start_date, '%Y-%m-%d').isoformat() + 'Z'
+        time_max = datetime.datetime.strptime(end_date, '%Y-%m-%d').isoformat() + 'Z'
+    else:
+        time_min = datetime.datetime.utcnow().isoformat() + 'Z'
+        time_max = None
+
+    events_result = service.events().list(calendarId=calendar_id, timeMin=time_min,
+                                          timeMax=time_max, singleEvents=True,
                                           orderBy='startTime').execute()
     events = events_result.get('items', [])
 
     events_list = []
+    total_duration = 0
+
     for event in events:
         start = event['start'].get('dateTime', event['start'].get('date'))
+        end = event['end'].get('dateTime', event['end'].get('date'))
         summary = event.get('summary', 'No Title')
-        events_list.append({'start': start, 'summary': summary})
 
-    return render(request, 'calculator/calendar.html', {'events': events_list})
+        start_time = datetime.datetime.fromisoformat(start)
+        end_time = datetime.datetime.fromisoformat(end)
+        duration = (end_time - start_time).total_seconds() / 60  # Продолжительность в минутах
+
+        # Отфильтровываем события, которые больше 8 часов (480 минут)
+        if duration <= 480:
+            total_duration += duration
+            formatted_start = start_time.strftime('%Y-%m-%d')
+            formatted_duration = f"{int(duration // 60)} hours {int(duration % 60)} minutes" if duration >= 60 else f"{int(duration)} minutes"
+            events_list.append({'start': formatted_start, 'summary': summary, 'duration': formatted_duration})
+
+    participants = 1
+    hourly_rate = salary / 176
+    total_cost = participants * hourly_rate * (total_duration / 60)
+
+    total_hours = int(total_duration // 60)
+    total_minutes = int(total_duration % 60)
+    total_time_formatted = f'{total_hours} hours {total_minutes} minutes'
+
+    return render(request, 'calculator/calendar.html', {
+        'events': events_list,
+        'total_time': total_time_formatted,
+        'total_cost': f'${total_cost:.2f}',
+        'start_date': start_date,
+        'end_date': end_date
+    })

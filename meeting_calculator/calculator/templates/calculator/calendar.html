@@ -4,19 +4,127 @@
     <meta charset="UTF-8">
     <title>Google Calendar Events</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .form-inline .form-group {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .form-inline .form-group label,
+        .form-inline .form-group input {
+            flex: 1;
+            min-width: 150px;
+        }
+        .form-inline .form-group input {
+            margin-left: 10px;
+        }
+        .form-group.salary {
+            flex: 1;
+            min-width: 300px;
+            margin-left: 20px; /* Добавляет отступ слева */
+        }
+        .form-group.salary label,
+        .form-group.salary input {
+            flex: 1;
+        }
+
+        .form-group button {
+            margin-left: 20px; /* Добавляет отступ слева для кнопки */
+        }
+        .results {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #333;
+        }
+        .results .total-time, .results .total-cost {
+            margin-bottom: 10px;
+        }
+        .results .total-time span, .results .total-cost span {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .highlight {
+            color: #007bff;
+            font-weight: bold;
+            border: 2px solid #007bff;
+            padding: 5px;
+            display: inline-block;
+        }
+        .list-group {
+            margin-top: 20px; /* Добавляет верхний отступ для списка встреч */
+        }
+        .back-button {
+            margin-top: 20px; /* Добавляет верхний отступ для кнопки */
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="mb-4">Upcoming Google Calendar Events</h1>
-        <ul class="list-group">
+        <div class="header-container mb-4">
+            <h1>Google Calendar Events</h1>
+            <a href="http://127.0.0.1:8000/" class="btn btn-secondary">Go to Stopwatch</a>
+        </div>
+
+        <!-- Форма для выбора диапазона дат и ввода данных -->
+        <form id="date-range-form" class="form-inline mb-4">
+            <div class="form-group">
+                <label for="start-date">Start Date:</label>
+                <input type="date" id="start-date" name="start_date" class="form-control" value="{{ start_date }}">
+            </div>
+            <div class="form-group">
+                <label for="end-date">End Date:</label>
+                <input type="date" id="end-date" name="end_date" class="form-control" value="{{ end_date }}">
+            </div>
+            <div class="form-group salary">
+                <label for="salary">Average Salary ($/month):</label>
+                <input type="number" id="salary" name="salary" class="form-control" value="{{ salary }}" min="0" placeholder="Your salary" required>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" onclick="fetchEvents()">Get Events</button>
+            </div>
+        </form>
+
+        <!-- Отображение общего времени и затрат -->
+        <div class="results">
+            <div class="total-time">
+                Total Time Spent from <span>{{ start_date }}</span> to <span>{{ end_date }}</span>: <span class="highlight">{{ total_time }}</span>
+            </div>
+            <div class="total-cost">
+                Total Cost: <span class="highlight">{{ total_cost }}</span>
+            </div>
+        </div>
+
+        <!-- Список встреч -->
+        <ul class="list-group" id="events-list">
             {% for event in events %}
                 <li class="list-group-item">
-                    <strong>{{ event.start }}:</strong> {{ event.summary }}
+                    <strong>{{ event.start }}:</strong> {{ event.summary }} ({{ event.duration }})
                 </li>
             {% empty %}
                 <li class="list-group-item">No upcoming events found.</li>
             {% endfor %}
         </ul>
     </div>
+
+    <script>
+        function fetchEvents() {
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            const salary = document.getElementById('salary').value;
+
+            if (startDate && endDate) {
+                const url = `{% url 'calendar' %}?start_date=${startDate}&end_date=${endDate}&salary=${salary}`;
+                window.location.href = url;
+            } else {
+                alert('Please select both start and end dates.');
+            }
+        }
+    </script>
 </body>
 </html>

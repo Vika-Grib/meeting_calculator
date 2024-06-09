@@ -1,212 +1,86 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meeting Cost Calculator</title>
+    <title>Google Calendar Events</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        .form-inline .form-group {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: #f4f4f4;
-            margin: 0;
+            flex-direction: row;
+            justify-content: space-between;
+            flex-wrap: wrap;
         }
-
-        h1 {
-            margin-bottom: 20px;
-            color: #333;
+        .form-inline .form-group label,
+        .form-inline .form-group input {
+            flex: 1;
+            min-width: 150px;
         }
-
-        form {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
+        .form-inline .form-group input {
+            margin-left: 10px;
         }
-
-        .form-group {
-            margin-bottom: 15px;
+        .form-group.salary {
+            flex: 1;
+            min-width: 300px;
         }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-        }
-
-        input[type="number"],
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-        .hidden {
-            display: none;
-        }
-
-        #timer {
-            font-size: 2em;
-            margin: 20px 0;
-        }
-
-        button {
-            padding: 10px 20px;
-            border: none;
-            background-color: #007bff;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            margin: 5px;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-
-        #cost-display {
-            margin-top: 20px;
-            font-size: 1.5em;
-            color: #007bff;
-        }
-
-        .clock {
-            position: relative;
-            width: 300px;
-            height: 300px;
-        }
-
-        .clock-face {
-            fill: none;
-            stroke: #333;
-            stroke-width: 8px;
-        }
-
-        .hand {
-            fill: none;
-            stroke: #e74c3c;
-            stroke-width: 4px;
-            stroke-linecap: round;
-            transform-origin: 50% 50%;
-            transition: transform 0.5s cubic-bezier(0.4, 2.3, 0.3, 1);
+        .form-group.salary label,
+        .form-group.salary input {
+            flex: 1;
         }
     </style>
 </head>
 <body>
-    <h1>Meeting Cost Calculator</h1>
-    <form id="calculator-form">
-        <div>
-            <label for="participants">Number of participants:</label>
-            <input type="number" id="participants" name="participants" value="5">
-        </div>
-        <div>
-            <label for="salary">Average salary ($/month):</label>
-            <input type="number" id="salary" name="salary" value="5000">
-        </div>
-        <div>
-            <label for="duration">Do you know the duration?</label>
-            <input type="checkbox" id="know-duration" name="know_duration" onchange="toggleDurationInput()">
-        </div>
-        <div id="manual-duration" class="hidden">
-            <label for="duration">Duration (minutes):</label>
-            <input type="number" id="duration" name="duration" value="60">
-        </div>
-        <div id="timer-duration">
-            <button type="button" onclick="startTimer()">Start Timer</button>
-            <button type="button" onclick="stopTimer()">Stop Timer</button>
-<!--            <button type="button" onclick="resetForm()">Reset Timer</button>-->
-            <div id="timer">0:00</div>
-            <div class="clock">
-                <svg class="clock" viewBox="0 0 100 100">
-                    <circle class="clock-face" cx="50" cy="50" r="45"/>
-                    <line class="hand" id="second-hand" x1="50" y1="50" x2="50" y2="15"/>
-                </svg>
+    <div class="container mt-5">
+        <h1 class="mb-4">Upcoming Google Calendar Events</h1>
+
+        <!-- Форма для выбора диапазона дат и ввода данных -->
+        <form id="date-range-form" class="form-inline mb-4">
+            <div class="form-group">
+                <label for="start-date">Start Date:</label>
+                <input type="date" id="start-date" name="start_date" class="form-control" value="{{ start_date }}">
             </div>
+            <div class="form-group">
+                <label for="end-date">End Date:</label>
+                <input type="date" id="end-date" name="end_date" class="form-control" value="{{ end_date }}">
+            </div>
+            <div class="form-group salary">
+                <label for="salary">Average Salary ($/month):</label>
+                <input type="number" id="salary" name="salary" class="form-control" value="Your salary" min="0" required>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="fetchEvents()">Get Events</button>
+        </form>
+
+        <!-- Список встреч -->
+        <ul class="list-group" id="events-list">
+            {% for event in events %}
+                <li class="list-group-item">
+                    <strong>{{ event.start }}:</strong> {{ event.summary }} ({{ event.duration }})
+                </li>
+            {% empty %}
+                <li class="list-group-item">No upcoming events found.</li>
+            {% endfor %}
+        </ul>
+
+        <!-- Отображение общего времени и затрат -->
+        <div class="mt-4">
+            <h3>Total Time Spent ({{ start_date }} to {{ end_date }}): <span id="total-time">{{ total_time }}</span></h3>
+            <h3>Total Cost: <span id="total-cost">{{ total_cost }}</span></h3>
         </div>
-        <button type="button" onclick="calculateCost()">Calculate</button>
-        <button type="button" onclick="resetForm()">Reset</button>
-    </form>
-    <div>
-        <h2>Meeting Cost: $<span id="cost">0</span></h2>
     </div>
+
     <script>
-        let startTime, timerInterval;
-        let durationInMinutes = 0;
-
-        function toggleDurationInput() {
-            const manualDuration = document.getElementById('manual-duration');
-            const timerDuration = document.getElementById('timer-duration');
-            const knowDuration = document.getElementById('know-duration').checked;
-
-            if (knowDuration) {
-                manualDuration.classList.remove('hidden');
-                timerDuration.classList.add('hidden');
-            } else {
-                manualDuration.classList.add('hidden');
-                timerDuration.classList.remove('hidden');
-            }
-        }
-
-        function startTimer() {
-            startTime = Date.now();
-            timerInterval = setInterval(updateTimer, 1000);
-        }
-
-        function stopTimer() {
-            clearInterval(timerInterval);
-            const endTime = Date.now();
-            const durationInSeconds = (endTime - startTime) / 1000;
-            durationInMinutes = durationInSeconds / 60;
-        }
-
-        function updateTimer() {
-            const now = Date.now();
-            const elapsedTime = Math.floor((now - startTime) / 1000);
-            const minutes = Math.floor(elapsedTime / 60);
-            const seconds = elapsedTime % 60;
-            document.getElementById('timer').innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-            const secondHand = document.getElementById('second-hand');
-            secondHand.style.transform = `rotate(${(seconds * 6) % 360}deg)`;
-        }
-
-        function calculateCost() {
-            const participants = document.getElementById('participants').value;
+        function fetchEvents() {
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
             const salary = document.getElementById('salary').value;
-            let duration;
 
-            if (document.getElementById('know-duration').checked) {
-                duration = parseFloat(document.getElementById('duration').value);
+            if (startDate && endDate) {
+                const url = `{% url 'calendar' %}?start_date=${startDate}&end_date=${endDate}&salary=${salary}`;
+                window.location.href = url;
             } else {
-                duration = durationInMinutes;
+                alert('Please select both start and end dates.');
             }
-
-            const hourlyRate = salary / 176;  // 176 рабочих часов в месяц
-            const cost = participants * hourlyRate * (duration / 60);
-
-            document.getElementById('cost').innerText = cost.toFixed(2);
-        }
-
-        function resetForm() {
-            document.getElementById('calculator-form').reset();
-            document.getElementById('timer').innerText = '0:00';
-            document.getElementById('cost').innerText = '0';
-            clearInterval(timerInterval);
-            durationInMinutes = 0;
-            const secondHand = document.getElementById('second-hand');
-            secondHand.style.transform = `rotate(0deg)`;
         }
     </script>
 </body>

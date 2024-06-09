@@ -33,7 +33,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV "/Users/vika/Desktop/PycharmProjects/meeting_calculator-main/meeting_calculator/venv"
+set -gx VIRTUAL_ENV "/Users/vika/Desktop/PycharmProjects/meeting_calculator/meeting_calculator/venv"
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/bin" $PATH

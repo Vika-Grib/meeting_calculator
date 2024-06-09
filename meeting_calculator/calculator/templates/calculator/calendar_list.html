@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Select Calendar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .description {
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            color: #555;
+        }
+        .form-inline .form-group {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .form-inline .form-group label,
+        .form-inline .form-group input,
+        .form-inline .form-group select {
+            flex: 1;
+            min-width: 150px;
+        }
+        .form-inline .form-group input,
+        .form-inline .form-group select {
+            margin-left: 10px;
+        }
+        .form-group.full-width {
+            width: 100%;
+        }
+        .form-group1, .form-group2 {
+            display: inline-block;
+            width: 48%;
+            vertical-align: top; /* Поднимаем форму */
+        }
+        .form-group2 {
+            margin-left: 4%;
+        }
+        .form-control {
+            width: 100%;
+        }
+        .form-inline button {
+            margin-left: 4%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Select Google Calendar</h1>
+        <p class="description">
+            Please select a calendar, start date, and end date to see how much time and money was spent on meetings during this period.<br>
+            This tool helps you analyze meeting costs based on the average salary.
+        </p>
+        <form method="GET" action="{% url 'calendar' %}" onsubmit="return validateForm()">
+            <div class="form-group full-width">
+                <label for="calendar_id">Calendar</label>
+                <select class="form-control" id="calendar_id" name="calendar_id" required>
+                    <option value="" disabled selected style="display:none;">Select a calendar</option>
+                    {% for id, summary in calendar_choices %}
+                        <option value="{{ id }}">{{ summary }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="start_date">Start Date</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="end_date">End Date</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date" required>
+                </div>
+            </div>
+            <div class="form-group full-width">
+                <label for="salary">Average Salary ($/month)</label>
+                <input type="number" class="form-control" id="salary" name="salary" placeholder="Your salary" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Get Events</button>
+        </form>
+    </div>
+    <script>
+        function validateForm() {
+            const salary = document.getElementById('salary').value;
+            if (salary < 0) {
+                alert('Salary cannot be negative.');
+                return false;
+            }
+            return true;
+        }
+    </script>
+</body>
+</html>
