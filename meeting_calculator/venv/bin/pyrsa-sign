@@ -1,4 +1,4 @@
-#!/Users/vika/Desktop/PycharmProjects/meeting_calculator-main/meeting_calculator/venv/bin/python3.12
+#!/Users/vika/Desktop/PycharmProjects/meeting_calculator/meeting_calculator/venv/bin/python3.12
 # -*- coding: utf-8 -*-
 import re
 import sys

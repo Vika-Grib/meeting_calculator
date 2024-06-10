@@ -94,8 +94,6 @@
             cursor: not-allowed;
         }
 
-
-<!--        цена с галочкой!-->
         #cost {
             font-size: 1em;
             color: #008080;
@@ -120,7 +118,6 @@
             border-radius: 50%;
         }
 
-
         .hand {
             fill: none;
             stroke: #FF0000;
@@ -131,7 +128,6 @@
             z-index: 50; /* Размещаем стрелку ниже текста */
             opacity: 0.8; /* Делаем стрелку более прозрачной */
         }
-
 
         #timer-button-container {
             margin-top: 10px; /* Отступ сверху */
@@ -146,7 +142,6 @@
             margin-left: 70px; /* Отступ слева */
             margin-right: 10px; /* Отступ справа */
         }
-
 
         #cost {
             font-size: 1em;
@@ -164,7 +159,6 @@
             text-align: center;
         }
 
-
         #manual-reset-button-container {
             position: relative; /* Относительное позиционирование для контейнера */
             margin-top: 10px; /* Отступ сверху */
@@ -178,7 +172,6 @@
             position: absolute; /* Абсолютное позиционирование для кнопки */
             left: 0; /* Положение слева */
         }
-
 
         .checkbox-container {
             display: flex;
@@ -234,6 +227,23 @@
             stroke-width: 2;
             opacity: 0.85;
             z-index: 0;
+        }
+
+        .google-login-button {
+            display: inline-block;
+            background-color: #3367D6;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .google-login-button:hover {
+            background-color: #46BD48;
         }
 
     </style>
@@ -360,10 +370,9 @@
         <div id="manual-reset-button-container" class="hidden">
             <button type="button" onclick="resetManualForm()">Reset</button>
         </div>
-
     </form>
 
-    <a href="{% url 'google_login' %}">Login with Google to view calendar events</a>
+    <a href="{% url 'google_login' %}" class="google-login-button">Login with Google to view calendar events</a>
 
     <script>
         let startTime, timerInterval;
@@ -437,8 +446,8 @@
             const seconds = String(elapsedTimeInSeconds % 60).padStart(2, '0');
             durationInMinutes = parseInt(hours) * 60 + parseInt(minutes) + seconds / 60;
 
-            const participants = document.getElementById('participants').value;
-            const salary = document.getElementById('salary').value;
+            const participants = parseInt(document.getElementById('participants').value);
+            const salary = parseFloat(document.getElementById('salary').value);
             if (participants <= 0 || salary < 0) {
                 alert('Participants and salary must be non-negative numbers.');
                 resetForm();
@@ -461,8 +470,8 @@
         }
 
         function calculateCost() {
-            const participants = document.getElementById('participants').value;
-            const salary = document.getElementById('salary').value;
+            const participants = parseInt(document.getElementById('participants').value);
+            const salary = parseFloat(document.getElementById('salary').value);
             const duration = parseFloat(document.getElementById('duration').value);
 
             if (participants <= 0 || salary < 0 || duration < 0) {

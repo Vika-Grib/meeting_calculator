@@ -9,38 +9,46 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 30px; /* Увеличиваем отступ снизу */
         }
         .form-inline .form-group {
             display: flex;
             flex-direction: row;
             justify-content: space-between;
-            flex-wrap: wrap;
+            align-items: center; /* Выравниваем элементы по центру */
+            flex-wrap: nowrap; /* Убираем перенос на новую строку */
+            margin-bottom: 10px; /* Уменьшаем отступ снизу */
         }
         .form-inline .form-group label,
         .form-inline .form-group input {
             flex: 1;
-            min-width: 150px;
+            min-width: 80px; /* Уменьшаем минимальную ширину */
+            margin-bottom: 5px; /* Уменьшаем отступ снизу */
+            padding: 2px; /* Уменьшаем внутренние отступы */
         }
         .form-inline .form-group input {
-            margin-left: 10px;
+            margin-left: 5px; /* Уменьшаем отступ слева */
         }
         .form-group.salary {
             flex: 1;
-            min-width: 300px;
-            margin-left: 20px; /* Добавляет отступ слева */
+            min-width: 150px; /* Уменьшаем минимальную ширину */
+            margin-left: 10px; /* Уменьшаем отступ слева */
         }
         .form-group.salary label,
         .form-group.salary input {
             flex: 1;
         }
-
-        .form-group button {
-            margin-left: 20px; /* Добавляет отступ слева для кнопки */
+        .form-group.button-container {
+            margin-left: 10px; /* Уменьшаем отступ слева для кнопки */
         }
-        .results {
-            margin-top: 20px;
+        .results, .form-container {
+            margin-top: 30px; /* Увеличиваем верхний отступ */
             font-size: 1.2em;
             color: #333;
+            padding: 20px; /* Добавляем внутренние отступы */
+            background-color: #f8f9fa; /* Добавляем фоновый цвет */
+            border-radius: 5px; /* Скругляем углы */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Добавляем тень */
         }
         .results .total-time, .results .total-cost {
             margin-bottom: 10px;
@@ -71,24 +79,27 @@
             <a href="http://127.0.0.1:8000/" class="btn btn-secondary">Go to Stopwatch</a>
         </div>
 
-        <!-- Форма для выбора диапазона дат и ввода данных -->
-        <form id="date-range-form" class="form-inline mb-4">
-            <div class="form-group">
-                <label for="start-date">Start Date:</label>
-                <input type="date" id="start-date" name="start_date" class="form-control" value="{{ start_date }}">
-            </div>
-            <div class="form-group">
-                <label for="end-date">End Date:</label>
-                <input type="date" id="end-date" name="end_date" class="form-control" value="{{ end_date }}">
-            </div>
-            <div class="form-group salary">
-                <label for="salary">Average Salary ($/month):</label>
-                <input type="number" id="salary" name="salary" class="form-control" value="{{ salary }}" min="0" placeholder="Your salary" required>
-            </div>
-            <div class="form-group">
-                <button type="button" class="btn btn-primary" onclick="fetchEvents()">Get Events</button>
-            </div>
-        </form>
+        <!-- Новый блок с формой -->
+        <div class="form-container">
+            <!-- Форма для выбора диапазона дат и ввода данных -->
+            <form id="date-range-form" class="form-inline mb-4">
+                <div class="form-group">
+                    <label for="start-date">Start Date:</label>
+                    <input type="date" id="start-date" name="start_date" class="form-control" value="{{ start_date }}">
+                </div>
+                <div class="form-group">
+                    <label for="end-date">End Date:</label>
+                    <input type="date" id="end-date" name="end_date" class="form-control" value="{{ end_date }}">
+                </div>
+                <div class="form-group salary">
+                    <label for="salary">Average Salary ($/month):</label>
+                    <input type="number" id="salary" name="salary" class="form-control" value="{{ salary }}" min="0" placeholder="Your salary" required>
+                </div>
+                <div class="form-group button-container">
+                    <button type="button" class="btn btn-primary" onclick="fetchEvents()">Get Events</button>
+                </div>
+            </form>
+        </div>
 
         <!-- Отображение общего времени и затрат -->
         <div class="results">

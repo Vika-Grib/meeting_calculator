@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,16 +5,25 @@
     <title>Google Calendar Events</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px; /* Увеличиваем отступ снизу */
+        }
         .form-inline .form-group {
             display: flex;
             flex-direction: row;
             justify-content: space-between;
-            flex-wrap: wrap;
+            align-items: center; /* Выравниваем элементы по центру */
+            flex-wrap: nowrap; /* Убираем перенос на новую строку */
+            margin-bottom: 15px; /* Добавляем отступ снизу */
         }
         .form-inline .form-group label,
         .form-inline .form-group input {
             flex: 1;
             min-width: 150px;
+            margin-bottom: 10px; /* Добавляем отступ снизу */
         }
         .form-inline .form-group input {
             margin-left: 10px;
@@ -23,33 +31,84 @@
         .form-group.salary {
             flex: 1;
             min-width: 300px;
+            margin-left: 20px; /* Добавляет отступ слева */
         }
         .form-group.salary label,
         .form-group.salary input {
             flex: 1;
         }
+        .form-group.button-container {
+            margin-left: 20px; /* Добавляет отступ слева для кнопки */
+        }
+        .results, .form-container {
+            margin-top: 30px; /* Увеличиваем верхний отступ */
+            font-size: 1.2em;
+            color: #333;
+            padding: 20px; /* Добавляем внутренние отступы */
+            background-color: #f8f9fa; /* Добавляем фоновый цвет */
+            border-radius: 5px; /* Скругляем углы */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Добавляем тень */
+        }
+        .results .total-time, .results .total-cost {
+            margin-bottom: 10px;
+        }
+        .results .total-time span, .results .total-cost span {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .highlight {
+            color: #007bff;
+            font-weight: bold;
+            border: 2px solid #007bff;
+            padding: 5px;
+            display: inline-block;
+        }
+        .list-group {
+            margin-top: 20px; /* Добавляет верхний отступ для списка встреч */
+        }
+        .back-button {
+            margin-top: 20px; /* Добавляет верхний отступ для кнопки */
+        }
     </style>
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="mb-4">Upcoming Google Calendar Events</h1>
+        <div class="header-container mb-4">
+            <h1>Google Calendar Events</h1>
+            <a href="http://127.0.0.1:8000/" class="btn btn-secondary">Go to Stopwatch</a>
+        </div>
 
-        <!-- Форма для выбора диапазона дат и ввода данных -->
-        <form id="date-range-form" class="form-inline mb-4">
-            <div class="form-group">
-                <label for="start-date">Start Date:</label>
-                <input type="date" id="start-date" name="start_date" class="form-control" value="{{ start_date }}">
+        <!-- Новый блок с формой -->
+        <div class="form-container">
+            <!-- Форма для выбора диапазона дат и ввода данных -->
+            <form id="date-range-form" class="form-inline mb-4">
+                <div class="form-group">
+                    <label for="start-date">Start Date:</label>
+                    <input type="date" id="start-date" name="start_date" class="form-control" value="{{ start_date }}">
+                </div>
+                <div class="form-group">
+                    <label for="end-date">End Date:</label>
+                    <input type="date" id="end-date" name="end_date" class="form-control" value="{{ end_date }}">
+                </div>
+                <div class="form-group salary">
+                    <label for="salary">Average Salary ($/month):</label>
+                    <input type="number" id="salary" name="salary" class="form-control" value="{{ salary }}" min="0" placeholder="Your salary" required>
+                </div>
+                <div class="form-group button-container">
+                    <button type="button" class="btn btn-primary" onclick="fetchEvents()">Get Events</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Отображение общего времени и затрат -->
+        <div class="results">
+            <div class="total-time">
+                Total Time Spent from <span>{{ start_date }}</span> to <span>{{ end_date }}</span>: <span class="highlight">{{ total_time }}</span>
             </div>
-            <div class="form-group">
-                <label for="end-date">End Date:</label>
-                <input type="date" id="end-date" name="end_date" class="form-control" value="{{ end_date }}">
+            <div class="total-cost">
+                Total Cost: <span class="highlight">{{ total_cost }}</span>
             </div>
-            <div class="form-group salary">
-                <label for="salary">Average Salary ($/month):</label>
-                <input type="number" id="salary" name="salary" class="form-control" value="Your salary" min="0" required>
-            </div>
-            <button type="button" class="btn btn-primary" onclick="fetchEvents()">Get Events</button>
-        </form>
+        </div>
 
         <!-- Список встреч -->
         <ul class="list-group" id="events-list">
@@ -61,12 +120,6 @@
                 <li class="list-group-item">No upcoming events found.</li>
             {% endfor %}
         </ul>
-
-        <!-- Отображение общего времени и затрат -->
-        <div class="mt-4">
-            <h3>Total Time Spent ({{ start_date }} to {{ end_date }}): <span id="total-time">{{ total_time }}</span></h3>
-            <h3>Total Cost: <span id="total-cost">{{ total_cost }}</span></h3>
-        </div>
     </div>
 
     <script>
